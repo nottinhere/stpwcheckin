@@ -14,8 +14,8 @@ import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:scan_preview/scan_preview_widget.dart';
 
 import '../location/location.dart';
-import '../location/permission_status.dart';
 
+// import '../location/permission_status.dart';
 // import '../location/change_notification.dart';
 // import '../location/get_location.dart';
 // import '../location/listen_location.dart';
@@ -115,12 +115,8 @@ class _HomeState extends State<Home> {
     double lng = _location.longitude;
 
     String url =
-        'https://nottinhere.com/demo/stap/api/json_submit_checkin.php?lat=$lat&lng=$lng&memberID=$memberID';
+        'https://nottinhere.com/demo/stpwcheckin/api/json_submit_checkin.php?lat=$lat&lng=$lng&memberID=$memberID';
     await http.get(url).then((response) {});
-  }
-
-  Image showImageNetWork(String urlImage) {
-    return Image.network(urlImage);
   }
 
   Widget myCircularProgress() {
@@ -129,6 +125,16 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Widget okButton(BuildContext buildContext) {
+    return FlatButton(
+      child: Text('OK'),
+      onPressed: () {
+        Navigator.of(buildContext).pop(); // pop คือการทำให้มันหายไป
+      },
+    );
+  }
+
+/*
   Widget logoutBox() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
@@ -170,53 +176,107 @@ class _HomeState extends State<Home> {
     await sharedPreferences.clear();
     exit(0);
   }
+*/
 
+///////////////////////////////  QR  //////////////////////////////////////
   Future<void> readQRcodePreview() async {
     try {
+      print('Before scan');
       final qrScanString = await Navigator.push(this.context,
           MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-
-      print('Before scan');
-      // final qrScanString = await BarcodeScanner.scan();
       print('After scan');
-      print('scanl result: $qrScanString');
-      qrString = qrScanString;
-      if (qrString != null) {
-        decodeQRcode(qrString);
+      print('readQRcodePreview result: $qrScanString');
+      if (qrScanString != null) {
+        confirmScanCheckin(qrScanString);
       }
-      // setState(() => scanResult = qrScanString);
     } on PlatformException catch (e) {
       print('e = $e');
     }
   }
+  /*
 
   Future<void> decodeQRcode(var code) async {
     try {
+      String memberID = myUserModel.id.toString();
+      final LocationData _locationResult = await location.getLocation();
+      _location = _locationResult;
+      double lat = _location.latitude;
+      double lng = _location.longitude;
+      print('decodeQRcode');
+      print('Location >> $_location');
+      print('LAT :: $lat');
+      print('LONG :: $lng');
+      _loading = false;
       String url =
-          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
-      http.Response response = await http.get(url);
-      var result = json.decode(response.body);
-      print('result ===*******>>>> $result');
-
-      int status = 1; //  result['status'];
-      if (status == 0) {
-        print('QR result > 0');
-        normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
-      } else {
-        print('QR result > 1');
-        _getLocation();
-      }
+          'https://nottinhere.com/demo/stpwcheckin/api/json_submit_checkin.php?code=$code&lat=$lat&lng=$lng&memberID=$memberID';
+      print(url);
     } catch (e) {}
+  }*/
+
+  void confirmScanCheckin(var code) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Confirm check in'),
+            content: Text('ยืนยันการเข้าส่งของ'),
+            actions: <Widget>[
+              cancelScanButton(),
+              comfirmScanButton(code),
+            ],
+          );
+        });
   }
 
-  Widget okButton(BuildContext buildContext) {
+  Widget cancelScanButton() {
     return FlatButton(
-      child: Text('OK'),
+      child: Text('Cancel'),
       onPressed: () {
-        Navigator.of(buildContext).pop(); // pop คือการทำให้มันหายไป
+        Navigator.of(context).pop();
       },
     );
   }
+
+  Widget comfirmScanButton(code) {
+    return FlatButton(
+      child: Text('Confirm'),
+      onPressed: () {
+        submitScanCheckin(code);
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+  Future<void> submitScanCheckin(code) async {
+    String memberID = myUserModel.id.toString();
+    final LocationData _locationResult = await location.getLocation();
+    _location = _locationResult;
+    double lat = _location.latitude;
+    double lng = _location.longitude;
+    print('decodeQRcode');
+    print('Location >> $_location');
+    print('LAT :: $lat');
+    print('LONG :: $lng');
+    _loading = false;
+    String url =
+        'https://nottinhere.com/demo/stpwcheckin/api/json_submit_scan_checkin.php?code=$code&lat=$lat&lng=$lng&memberID=$memberID';
+    print(url);
+    await http.get(url).then((response) {});
+    final snackBar = SnackBar(
+      content: Text('เพิ่มตำแหน่งการส่งสินค้าเรียบร้อย'),
+      margin: EdgeInsets.all(20),
+      duration: Duration(seconds: 3),
+      backgroundColor: Colors.blue,
+      elevation: 50,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      ),
+    );
+    Scaffold.of(context).showSnackBar(snackBar);
+  }
+
+///////////////////////////////  QR  //////////////////////////////////////
 
   Widget showTitle(String title) {
     return ListTile(
@@ -279,6 +339,7 @@ class _HomeState extends State<Home> {
           ),
         ),
         onTap: () {
+          // _getLocation();
           readQRcodePreview();
         },
       ),
@@ -321,6 +382,8 @@ class _HomeState extends State<Home> {
     );
   }
 
+  /*
+
   Widget LogoutBox() {
     // losesale
     return Container(
@@ -360,6 +423,9 @@ class _HomeState extends State<Home> {
     );
   }
 
+  */
+
+/*
   Widget row1Menu() {
     return Row(
       // mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -372,12 +438,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget mySizebox() {
-    return SizedBox(
-      width: 10.0,
-      height: 10.0,
-    );
-  }
+ 
 
   Widget homeMenu() {
     return Container(
@@ -392,6 +453,13 @@ class _HomeState extends State<Home> {
           mySizebox(),
         ],
       ),
+    );
+  }
+*/
+  Widget mySizebox() {
+    return SizedBox(
+      width: 10.0,
+      height: 10.0,
     );
   }
 
@@ -428,41 +496,31 @@ class _HomeState extends State<Home> {
           // headTitle('ข้อมูลของคุณ', Icons.verified_user),
           // profileBox(),
           headTitle('เมนู', Icons.home),
-          homeMenu(),
-          // Container(
-          //   margin: const EdgeInsets.all(10),
-          //   child: ElevatedButton(
-          //     style: ElevatedButton.styleFrom(
-          //       primary: Colors.lightBlue,
-          //       padding: EdgeInsets.all(8),
-          //       textStyle: TextStyle(fontSize: 20),
+          btnScanCheckin(),
+          // btnCheckin(),
+          mySizebox(),
+          // SingleChildScrollView(
+          //   child: Container(
+          //     padding: const EdgeInsets.all(32),
+          //     child: Column(
+          //       children: const <Widget>[
+          // PermissionStatusWidget(),
+          // Divider(height: 32),
+          // ServiceEnabledWidget(),
+          // Divider(height: 32),
+          // GetLocationWidget(),
+          // Divider(height: 32),
+          // ListenLocationWidget(),
+          // Divider(height: 32),
+          // ChangeSettings(),
+          // Divider(height: 32),
+          // EnableInBackgroundWidget(),
+          // Divider(height: 32),
+          // ChangeNotificationWidget()
+          //       ],
           //     ),
-          //     child: Text('Request Runtime Camera Permission'),
-          //     onPressed: requestCameraPermission,
           //   ),
           // ),
-          SingleChildScrollView(
-            child: Container(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                children: const <Widget>[
-                  PermissionStatusWidget(),
-                  // Divider(height: 32),
-                  // ServiceEnabledWidget(),
-                  // Divider(height: 32),
-                  // GetLocationWidget(),
-                  // Divider(height: 32),
-                  // ListenLocationWidget(),
-                  // Divider(height: 32),
-                  // ChangeSettings(),
-                  // Divider(height: 32),
-                  // EnableInBackgroundWidget(),
-                  // Divider(height: 32),
-                  // ChangeNotificationWidget()
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );

@@ -56,7 +56,7 @@ class MyStyle {
   String readProductWhereMode =
       'https://nottinhere.com/demo/stap/api/json_product.php?searchKey=';
   String getUserWhereUserAndPass =
-      'https://nottinhere.com/demo/stap/api/json_authen.php'; // json_login.php
+      'https://nottinhere.com/demo/stpwcheckin/api/json_authen.php'; // json_login.php
   String getProductWhereId =
       'https://nottinhere.com/demo/stap/api/json_productdetail.php?id=';
 

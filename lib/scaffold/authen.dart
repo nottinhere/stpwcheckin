@@ -166,7 +166,7 @@ class _AuthenState extends State<Authen> {
     } else {
       // No space
       String url =
-          '${MyStyle().getUserWhereUserAndPass}?username=$user&password=$password';
+          'https://nottinhere.com/demo/stpwcheckin/api/json_authen.php?username=$user&password=$password';
       print('url = $url');
 
       http.Response response = await http
