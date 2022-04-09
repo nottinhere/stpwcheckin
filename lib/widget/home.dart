@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import 'package:stpwcheckin/utility/my_style.dart';
 import 'package:stpwcheckin/models/user_model.dart';
+import 'package:stpwcheckin/models/checkin_model.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,20 +33,38 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   UserModel myUserModel;
+  CheckinModel checkinModel;
+
   final Location location = Location();
 
   LocationData _location;
   bool _loading = false;
   String _error;
   String qrString;
-
+  int showCountindate = 0;
   // Method
   @override
   void initState() {
     super.initState();
-    // readPromotion();
-    // readNews();
     myUserModel = widget.userModel;
+    getdataCheckin();
+  }
+
+  Future<void> getdataCheckin() async {
+    int memberId = myUserModel.id;
+    String url =
+        'https://nottinhere.com/demo/stpwcheckin/api/json_data_checkin_today.php?memberID=$memberId';
+    // print('url = $url');
+    http.Response response = await http.get(url);
+    var result = json.decode(response.body);
+
+    setState(() {
+      int statusInt = result['status'];
+
+      Map<String, dynamic> map = result['data'];
+      CheckinModel lastcheckinModel = CheckinModel.fromJson(map);
+      showCountindate = lastcheckinModel.sqindate;
+    });
   }
 
   Future<void> _getLocation() async {
@@ -88,6 +107,56 @@ class _HomeState extends State<Home> {
             ],
           );
         });
+  }
+
+  Widget profileBox() {
+    String login = myUserModel.subject;
+    int loginStatus = myUserModel.status;
+
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          color: Colors.lightBlue.shade50,
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: [
+                Row(
+                  children: <Widget>[
+                    Container(
+                      width: 45.0,
+                      child: Image.asset('images/icon_user.png'),
+                      padding: EdgeInsets.all(8.0),
+                    ),
+                    Text(
+                      '$login', // 'ผู้แทน : $login',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                    ),
+                  ],
+                ),
+                Text(
+                  'วันนี้ส่งของไปแล้วจำนวน $showCountindate จุด', // 'ผู้แทน : $login',
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click profile');
+          // routeToListProduct(0);
+        },
+      ),
+    );
   }
 
   Widget cancelButton() {
@@ -134,84 +203,35 @@ class _HomeState extends State<Home> {
     );
   }
 
-/*
-  Widget logoutBox() {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.9,
-      // height: 80.0,
-      child: GestureDetector(
-        child: Card(
-          // color: Colors.lightBlue.shade50,
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Row(
-              children: <Widget>[
-                Container(
-                  width: 45.0,
-                  child: Image.asset('images/icon_logout.png'),
-                  padding: EdgeInsets.all(8.0),
-                ),
-                Text(
-                  'ออกจากระบบ',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        onTap: () {
-          print('You click logout');
-          logOut();
-        },
-      ),
-    );
-  }
-
-  Future<void> logOut() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences.clear();
-    exit(0);
-  }
-*/
-
 ///////////////////////////////  QR  //////////////////////////////////////
   Future<void> readQRcodePreview() async {
     try {
-      print('Before scan');
       final qrScanString = await Navigator.push(this.context,
           MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-      print('After scan');
       print('readQRcodePreview result: $qrScanString');
       if (qrScanString != null) {
-        confirmScanCheckin(qrScanString);
+        int memberID = myUserModel.id;
+        String urlCheck =
+            'https://nottinhere.com/demo/stpwcheckin/api/json_data_checkin.php?memberID=$memberID&code=$qrScanString';
+        print('urlCheck = $urlCheck');
+        http.Response response = await http.get(urlCheck);
+        var resultCheck = json.decode(response.body);
+        int statusCheck = resultCheck['status'];
+        String message = resultCheck['message'];
+
+        if (statusCheck == 0) {
+          print('resultCheck = $resultCheck');
+          print('statusCheck = $statusCheck');
+          print('message = $message');
+          normalDialog(context, 'ข้อมูลไม่ถูกต้อง', message);
+        } else if (statusCheck == 1) {
+          confirmScanCheckin(qrScanString);
+        }
       }
     } on PlatformException catch (e) {
       print('e = $e');
     }
   }
-  /*
-
-  Future<void> decodeQRcode(var code) async {
-    try {
-      String memberID = myUserModel.id.toString();
-      final LocationData _locationResult = await location.getLocation();
-      _location = _locationResult;
-      double lat = _location.latitude;
-      double lng = _location.longitude;
-      print('decodeQRcode');
-      print('Location >> $_location');
-      print('LAT :: $lat');
-      print('LONG :: $lng');
-      _loading = false;
-      String url =
-          'https://nottinhere.com/demo/stpwcheckin/api/json_submit_checkin.php?code=$code&lat=$lat&lng=$lng&memberID=$memberID';
-      print(url);
-    } catch (e) {}
-  }*/
 
   void confirmScanCheckin(var code) {
     showDialog(
@@ -249,6 +269,7 @@ class _HomeState extends State<Home> {
 
   Future<void> submitScanCheckin(code) async {
     String memberID = myUserModel.id.toString();
+
     final LocationData _locationResult = await location.getLocation();
     _location = _locationResult;
     double lat = _location.latitude;
@@ -261,7 +282,11 @@ class _HomeState extends State<Home> {
     String url =
         'https://nottinhere.com/demo/stpwcheckin/api/json_submit_scan_checkin.php?code=$code&lat=$lat&lng=$lng&memberID=$memberID';
     print(url);
-    await http.get(url).then((response) {});
+    await http.get(url).then((response) {
+      setState(() {
+        getdataCheckin();
+      });
+    });
     final snackBar = SnackBar(
       content: Text('เพิ่มตำแหน่งการส่งสินค้าเรียบร้อย'),
       margin: EdgeInsets.all(20),
@@ -493,34 +518,12 @@ class _HomeState extends State<Home> {
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
-          // headTitle('ข้อมูลของคุณ', Icons.verified_user),
-          // profileBox(),
+          headTitle('ข้อมูลของคุณ', Icons.verified_user),
+          profileBox(),
           headTitle('เมนู', Icons.home),
           btnScanCheckin(),
           // btnCheckin(),
           mySizebox(),
-          // SingleChildScrollView(
-          //   child: Container(
-          //     padding: const EdgeInsets.all(32),
-          //     child: Column(
-          //       children: const <Widget>[
-          // PermissionStatusWidget(),
-          // Divider(height: 32),
-          // ServiceEnabledWidget(),
-          // Divider(height: 32),
-          // GetLocationWidget(),
-          // Divider(height: 32),
-          // ListenLocationWidget(),
-          // Divider(height: 32),
-          // ChangeSettings(),
-          // Divider(height: 32),
-          // EnableInBackgroundWidget(),
-          // Divider(height: 32),
-          // ChangeNotificationWidget()
-          //       ],
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );
