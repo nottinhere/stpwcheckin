@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:stpwcheckin/models/user_model.dart';
-import 'package:stpwcheckin/models/popup_model.dart';
 import 'package:stpwcheckin/scaffold/my_service.dart';
 import 'package:stpwcheckin/utility/my_style.dart';
 import 'package:stpwcheckin/utility/normal_dialog.dart';
@@ -23,7 +22,6 @@ class _AuthenState extends State<Authen> {
   bool remember = false; // false => unCheck      true = Check
   bool status = true;
 
-  PopupModel popupModel;
   String subjectPopup = '';
   String imagePopup = '';
   String statusPopup = '';

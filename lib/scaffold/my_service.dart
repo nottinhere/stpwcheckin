@@ -6,11 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:stpwcheckin/models/user_model.dart';
 import 'package:stpwcheckin/scaffold/result_code.dart';
 import 'package:stpwcheckin/utility/my_style.dart';
-import 'package:stpwcheckin/widget/contact.dart';
 import 'package:stpwcheckin/widget/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'detail_cart.dart';
 
 class MyService extends StatefulWidget {
   final UserModel userModel;
