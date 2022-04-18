@@ -42,6 +42,8 @@ class _HomeState extends State<Home> {
   String _error;
   String qrString;
   int showCountindate = 0;
+  String txtname = '';
+
   // Method
   @override
   void initState() {
@@ -233,6 +235,34 @@ class _HomeState extends State<Home> {
     }
   }
 
+  Future<void> txtQRcodePreview(txtname) async {
+    try {
+      final qrScanString = txtname;
+      print('readQRcodePreview result: $qrScanString');
+      if (qrScanString != null) {
+        int memberID = myUserModel.id;
+        String urlCheck =
+            'https://nottinhere.com/demo/stpwcheckin/api/json_data_checkin.php?memberID=$memberID&code=$qrScanString';
+        print('urlCheck = $urlCheck');
+        http.Response response = await http.get(urlCheck);
+        var resultCheck = json.decode(response.body);
+        int statusCheck = resultCheck['status'];
+        String message = resultCheck['message'];
+
+        if (statusCheck == 0) {
+          print('resultCheck = $resultCheck');
+          print('statusCheck = $statusCheck');
+          print('message = $message');
+          normalDialog(context, 'ข้อมูลไม่ถูกต้อง', message);
+        } else if (statusCheck == 1) {
+          confirmScanCheckin(qrScanString);
+        }
+      }
+    } on PlatformException catch (e) {
+      print('e = $e');
+    }
+  }
+
   void confirmScanCheckin(var code) {
     showDialog(
         context: context,
@@ -334,6 +364,68 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Widget formBox() {
+    var _controller = TextEditingController();
+
+    return Card(
+      child: Container(
+        // decoration: MyStyle().boxLightGreen,
+        width: MediaQuery.of(context).size.width * 0.80,
+        padding: EdgeInsets.all(20),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Column(
+            children: [
+              Column(
+                children: <Widget>[
+                  // Text('code :'),
+                  // mySizebox(),
+                  Text(
+                    'สแกนด้วยเครื่อง',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                  ),
+                  mySizebox(),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    child: TextField(
+                      controller: _controller,
+                      autofocus: true,
+                      onSubmitted: (value) {
+                        txtQRcodePreview(value);
+                        _controller.clear();
+                      },
+                      style: TextStyle(color: Colors.black),
+                      // initialValue: complainAllModel.postby, // set default value
+                      onChanged: (string) {
+                        txtname = string.trim();
+                      },
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.only(
+                          top: 6.0,
+                        ),
+                        suffixIcon: IconButton(
+                          onPressed: _controller.clear,
+                          icon: Icon(Icons.clear),
+                        ),
+                        // prefixIcon: Icon(Icons.mode_edit, color: Colors.grey),
+                        // border: InputBorder.none,
+                        hintText: '',
+                        hintStyle: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget btnScanCheckin() {
     // all product
     return Container(
@@ -348,16 +440,17 @@ class _HomeState extends State<Home> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
+                Text(
+                  'สแกนด้วยกล้อง',
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+                mySizebox(),
                 Container(
                   width: 70.0,
                   child: Image.asset('images/barcode.png'),
-                ),
-                Text(
-                  'Scan Checkin',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
                 ),
               ],
             ),
@@ -407,80 +500,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /*
-
-  Widget LogoutBox() {
-    // losesale
-    return Container(
-      // width: MediaQuery.of(context).size.width * 0.45,
-      // height: 80.0,
-      width: 150.0,
-      height: 150.0,
-
-      child: GestureDetector(
-        child: Card(
-          // color: Colors.green.shade100,
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Column(
-              children: <Widget>[
-                Container(
-                  width: 70.0,
-                  child: Image.asset('images/icon_logout.png'),
-                ),
-                Text(
-                  'ออกจากระบบ',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        onTap: () {
-          print('You click square logout');
-          logOut();
-        },
-      ),
-    );
-  }
-
-  */
-
-/*
-  Widget row1Menu() {
-    return Row(
-      // mainAxisAlignment: MainAxisAlignment.spaceAround,
-      // mainAxisSize: MainAxisSize.max,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        btnScanCheckin(),
-        btnCheckin(),
-      ],
-    );
-  }
-
- 
-
-  Widget homeMenu() {
-    return Container(
-      margin: EdgeInsets.only(top: 5.0),
-      alignment: Alignment(0.0, 0.0),
-      // color: Colors.green.shade50,
-      // height: MediaQuery.of(context).size.height * 0.5 - 81,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          row1Menu(),
-          mySizebox(),
-        ],
-      ),
-    );
-  }
-*/
   Widget mySizebox() {
     return SizedBox(
       width: 10.0,
@@ -521,6 +540,7 @@ class _HomeState extends State<Home> {
           headTitle('ข้อมูลของคุณ', Icons.verified_user),
           profileBox(),
           headTitle('เมนู', Icons.home),
+          formBox(),
           btnScanCheckin(),
           // btnCheckin(),
           mySizebox(),
