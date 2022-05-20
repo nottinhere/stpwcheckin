@@ -164,7 +164,7 @@ class _AuthenState extends State<Authen> {
     } else {
       // No space
       String url =
-          'https://nottinhere.com/demo/stpwcheckin/api/json_authen.php?username=$user&password=$password';
+          'http://www.vaiwits.com/stpwcheckin/api/json_authen.php?username=$user&password=$password';
       print('url = $url');
 
       http.Response response = await http
@@ -231,17 +231,6 @@ class _AuthenState extends State<Authen> {
       return false;
     });
   }
-
-  // void routeToMyService(statusPopup) async {  // with popup
-  //   // print('statusPopup >> $statusPopup');
-  //   if (statusPopup == '1') {
-  //     // when turn on popup alert
-  //     WidgetsBinding.instance
-  //         .addPostFrameCallback((_) => _onBasicAlertPressed(context));
-  //   } else {
-  //     gotoService();
-  //   }
-  // }
 
   Widget userForm() {
     return Container(

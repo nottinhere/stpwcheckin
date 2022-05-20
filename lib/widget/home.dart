@@ -55,7 +55,7 @@ class _HomeState extends State<Home> {
   Future<void> getdataCheckin() async {
     int memberId = myUserModel.id;
     String url =
-        'https://nottinhere.com/demo/stpwcheckin/api/json_data_checkin_today.php?memberID=$memberId';
+        'http://www.vaiwits.com/stpwcheckin/api/json_data_checkin_today.php?memberID=$memberId';
     // print('url = $url');
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
@@ -186,7 +186,7 @@ class _HomeState extends State<Home> {
     double lng = _location.longitude;
 
     String url =
-        'https://nottinhere.com/demo/stpwcheckin/api/json_submit_checkin.php?lat=$lat&lng=$lng&memberID=$memberID';
+        'http://www.vaiwits.com/stpwcheckin/api/json_submit_checkin.php?lat=$lat&lng=$lng&memberID=$memberID';
     await http.get(url).then((response) {});
   }
 
@@ -214,7 +214,7 @@ class _HomeState extends State<Home> {
       if (qrScanString != null) {
         int memberID = myUserModel.id;
         String urlCheck =
-            'https://nottinhere.com/demo/stpwcheckin/api/json_data_checkin.php?memberID=$memberID&code=$qrScanString';
+            'http://www.vaiwits.com/stpwcheckin/api/json_data_checkin.php?memberID=$memberID&code=$qrScanString';
         print('urlCheck = $urlCheck');
         http.Response response = await http.get(urlCheck);
         var resultCheck = json.decode(response.body);
@@ -227,7 +227,8 @@ class _HomeState extends State<Home> {
           print('message = $message');
           normalDialog(context, 'ข้อมูลไม่ถูกต้อง', message);
         } else if (statusCheck == 1) {
-          confirmScanCheckin(qrScanString);
+          // confirmScanCheckin(qrScanString);
+          submitScanCheckin(qrScanString);
         }
       }
     } on PlatformException catch (e) {
@@ -242,7 +243,7 @@ class _HomeState extends State<Home> {
       if (qrScanString != null) {
         int memberID = myUserModel.id;
         String urlCheck =
-            'https://nottinhere.com/demo/stpwcheckin/api/json_data_checkin.php?memberID=$memberID&code=$qrScanString';
+            'http://www.vaiwits.com/stpwcheckin/api/json_data_checkin.php?memberID=$memberID&code=$qrScanString';
         print('urlCheck = $urlCheck');
         http.Response response = await http.get(urlCheck);
         var resultCheck = json.decode(response.body);
@@ -255,7 +256,8 @@ class _HomeState extends State<Home> {
           print('message = $message');
           normalDialog(context, 'ข้อมูลไม่ถูกต้อง', message);
         } else if (statusCheck == 1) {
-          confirmScanCheckin(qrScanString);
+          // confirmScanCheckin(qrScanString);
+          submitScanCheckin(qrScanString);
         }
       }
     } on PlatformException catch (e) {
@@ -310,7 +312,7 @@ class _HomeState extends State<Home> {
     print('LONG :: $lng');
     _loading = false;
     String url =
-        'https://nottinhere.com/demo/stpwcheckin/api/json_submit_scan_checkin.php?code=$code&lat=$lat&lng=$lng&memberID=$memberID';
+        'http://www.vaiwits.com/stpwcheckin/api/json_submit_scan_checkin.php?code=$code&lat=$lat&lng=$lng&memberID=$memberID';
     print(url);
     await http.get(url).then((response) {
       setState(() {
@@ -459,42 +461,6 @@ class _HomeState extends State<Home> {
         onTap: () {
           // _getLocation();
           readQRcodePreview();
-        },
-      ),
-    );
-  }
-
-  Widget btnCheckin() {
-    // all product
-    return Container(
-      // width: MediaQuery.of(context).size.width * 0.45,
-      width: 150.0,
-      height: 150.0,
-      child: GestureDetector(
-        child: Card(
-          // color: Colors.green.shade100,
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Column(
-              children: <Widget>[
-                Container(
-                  width: 70.0,
-                  child: Image.asset('images/checkin.png'),
-                ),
-                Text(
-                  'Check in',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        onTap: () {
-          _getLocation();
         },
       ),
     );

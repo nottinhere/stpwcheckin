@@ -55,23 +55,6 @@ class _MyServiceState extends State<MyService> {
     );
   }
 
-  // Widget menuContact() {
-  //   return ListTile(
-  //     leading: Icon(
-  //       Icons.home,
-  //       size: 36.0,
-  //     ),
-  //     title: Text('Contact'),
-  //     subtitle: Text('Contact stpwcheckin'),
-  //     onTap: () {
-  //       setState(() {
-  //         currentWidget = Contact();
-  //       });
-  //       Navigator.of(context).pop();
-  //     },
-  //   );
-  // }
-
   Widget showAppName() {
     return Text('For Driver');
   }
@@ -126,7 +109,6 @@ class _MyServiceState extends State<MyService> {
         children: <Widget>[
           headDrawer(),
           menuHome(),
-          // menuContact(),
           menuLogOut(),
         ],
       ),
